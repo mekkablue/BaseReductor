@@ -30,10 +30,18 @@ specialDict = {
 
 class BaseReductor(FilterWithoutDialog):
 	
+	@objc.python_method
 	def settings(self):
-		self.menuName = u'BaseReductor'
+		self.menuName = Glyphs.localize({
+			'en': 'Base Reductor',
+			'de': 'Basis-Reduktor',
+			'fr': 'Réducteur à base',
+			'es': 'Reductor a la base',
+		})
+		
 		self.keyboardShortcut = None # With Cmd+Shift
 	
+	@objc.python_method
 	def nameWithoutSuffix(self, glyphName):
 		if "." in glyphName:
 			dotOffset = glyphName.find(".")
@@ -41,6 +49,7 @@ class BaseReductor(FilterWithoutDialog):
 		else:
 			return glyphName
 	
+	@objc.python_method
 	def filter(self, Layer, inEditView, customParameters):
 		glyph = Layer.parent
 		font = glyph.parent
@@ -56,18 +65,23 @@ class BaseReductor(FilterWithoutDialog):
 					if not font[specialComponent]:
 						allSpecialComponentsInFont = False
 				if not allSpecialComponentsInFont:
-					print u"🔥 BaseReductor: Not all parts available for: %s" % specialName
+					print("🔥 Base Reductor: Not all parts available for: %s" % specialName)
 				else:
 					Layer.clear()
 					for basename in specialDict[specialName]:
 						base = GSComponent(basename)
-						Layer.components.append(base)
+						try:
+							# GLYPHS 3
+							Layer.shapes.append(base)
+						except:
+							# GLYPHS 2
+							Layer.components.append(base)
 					return None
 			
 		if glyph.category =="Letter" and glyph.subCategory != "Ligature":
 			glyphInfo = glyph.glyphInfo
 			if not glyphInfo:
-				print u"🔥 BaseReductor: no glyph info: %s" % glyph.name
+				print("🔥 Base Reductor: no glyph info: %s" % glyph.name)
 			elif glyphInfo.components:
 				basename = glyphInfo.components[0].name
 				
@@ -76,7 +90,7 @@ class BaseReductor(FilterWithoutDialog):
 					oldBasename = basename
 					basename = excludeDict[basename]
 					
-					# print u"🔄 BaseReductor %s: Will use %s instead of %s." % (glyph.name, oldBasename, basename)
+					# print("🔄 Base Reductor %s: Will use %s instead of %s." % (glyph.name, oldBasename, basename))
 				
 				# look if glyph exists:
 				if not font.glyphs[basename] and font.glyphs[self.nameWithoutSuffix(basename)]:
@@ -85,18 +99,24 @@ class BaseReductor(FilterWithoutDialog):
 					if basename != glyph.name:
 						Layer.clear()
 						base = GSComponent(basename)
-						Layer.components.append(base)
+						try:
+							# GLYPHS 3
+							Layer.shapes.append(base)
+						except:
+							# GLYPHS 2
+							Layer.components.append(base)
 					else:
 						Layer.decomposeComponents() # do not let i/j reference itself
 				else:
-					print u"❌ BaseReductor: no base glyph (%s) in font for: %s" % (basename, glyph.name)
+					print("❌ Base Reductor: no base glyph (%s) in font for: %s" % (basename, glyph.name))
 			else:
 				pass
-				# print u"⚠️ BaseReductor: no components in glyph info: %s" % glyph.name
+				# print("⚠️ Base Reductor: no components in glyph info: %s" % glyph.name)
 		else:
 			pass
-			# print u"💚 BaseReductor: %s left unchanged" % glyph.name
-			
+			# print("💚 Base Reductor: %s left unchanged" % glyph.name)
+	
+	@objc.python_method
 	def __file__(self):
 		"""Please leave this method unchanged"""
 		return __file__
