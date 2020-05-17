@@ -1,4 +1,5 @@
 # encoding: utf-8
+from __future__ print_function
 
 import objc
 from GlyphsApp import *
@@ -120,4 +121,3 @@ class BaseReductor(FilterWithoutDialog):
 	def __file__(self):
 		"""Please leave this method unchanged"""
 		return __file__
-	
